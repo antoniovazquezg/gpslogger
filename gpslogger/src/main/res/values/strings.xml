@@ -119,6 +119,9 @@
     <!-- Settings activity -->
     <string name="settings_distance_in_meters">Distance in meters</string>
     <string name="settings_accuracy_in_meters">Accuracy in meters</string>
+    <string name="settings_accuracy_in_feet">Accuracy in feet</string>
+    <string name="settings_desired_accuracy_in_meters">Desired Accuracy in meters</string>
+    <string name="settings_desired_accuracy_in_feet">Desired Accuracy in feet</string>
     <string name="settings_enter_meters">Enter meters(max 9999)</string>
 
     <!-- Settings -->
@@ -289,7 +292,7 @@
     <string name="owncloud_directory_summary">Folder to use on ownCloud server. Ensure that it exists or upload will fail.</string>
     <string name="owncloud_test">Test ownCloud Upload</string>
     <string name="owncloud_test_summary">Upload a test file to the ownCloud server</string>
-   
+
     <string name="owncloud_testing">Testing ownCloud upload</string>
     <string name="owncloud_invalid_settings">Invalid settings</string>
     <string name="owncloud_invalid_summary">Some of your settings are invalid. Please ensure that you have filled out all relevant fields. </string>
@@ -420,6 +423,8 @@
 
     <string name="accuracy_filter_title">Accuracy Filter</string>
     <string name="accuracy_filter_summary">The minimum precision required for a point to be saved. Points that aren\'t this accurate will be discarded.</string>
+    <string name="desired_accuracy_filter_title">Desired Accuracy Filter</string>
+    <string name="desired_accuracy_filter_summary">The maximum precision required for a point to be saved. App will keep trying to increase precision until this is met or time is over.</string>
     <string name="distance_filter_title">Distance filter</string>
     <string name="distance_filter_summary">The minimum distance required between current and previous for a point to be saved, otherwise the point will be discarded.</string>
     <string name="points">points</string>

@@ -741,7 +741,7 @@ public class GpsLoggingService extends Service  {
 
 
         boolean isPassiveLocation = loc.getExtras().getBoolean("PASSIVE");
-        
+
         //check if we change of day and then write the last position of yesterday as the first position of today
         if (AppSettings.shouldCreateNewFileOnceADay()) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -749,29 +749,33 @@ public class GpsLoggingService extends Service  {
             if (!today.equals(Session.getCurrentFileName()))
                 ResetCurrentFileName(false);
         }
-        
+
 
         // Don't do anything until the user-defined accuracy is reached
         // However, if user has set an annotation, just log the point, disregard any filters
-        if (!Session.hasDescription() &&  AppSettings.getMinimumAccuracy() > 0) {
+        if (!Session.hasDescription() &&  AppSettings.getDesiredAccuracyInMeters() > 0) {
 
             //Don't apply the retry interval to passive locations
-            if (!isPassiveLocation && AppSettings.getMinimumAccuracy() < Math.abs(loc.getAccuracy())) {
+            double currentAccuracy = loc.getAccuracy();
+            if (!isPassiveLocation && AppSettings.getDesiredAccuracyInMeters() < Math.abs(currentAccuracy)) {
 
                 if (this.firstRetryTimeStamp == 0) {
                     this.firstRetryTimeStamp = System.currentTimeMillis();
                 }
 
-                if (currentTimeStamp - this.firstRetryTimeStamp <= AppSettings.getLoggingRetryPeriod() * 1000) {
-                    tracer.warn("Only accuracy of " + String.valueOf(Math.floor(loc.getAccuracy())) + " m. Point discarded." + getString(R.string.inaccurate_point_discarded));
+                if (currentTimeStamp - this.firstRetryTimeStamp <= AppSettings.getRetryInterval() * 1000) {
+                    tracer.warn("Only accuracy of " + String.valueOf(Math.floor(currentAccuracy)) + " m. Point discarded.");
+                    SetStatus("Inaccurate point (" + Math.floor(currentAccuracy) + ") discarded.");
                     //return and keep trying
                     return;
                 }
 
-                if (currentTimeStamp - this.firstRetryTimeStamp > AppSettings.getLoggingRetryPeriod() * 1000) {
-                    tracer.warn("Only accuracy of " + String.valueOf(Math.floor(loc.getAccuracy())) + " m and timeout reached." + getString(R.string.inaccurate_point_discarded));
-                    //Give up for now
-                    StopManagerAndResetAlarm();
+                if (currentTimeStamp - this.firstRetryTimeStamp > AppSettings.getRetryInterval() * 1000) {
+                    if (AppSettings.getMinimumAccuracyInMeters() < Math.abs(currentAccuracy)) {
+                        tracer.warn("Only accuracy of " + String.valueOf(Math.floor(currentAccuracy)) + " m and timeout reached");
+                        SetStatus("Inaccurate points (" + Math.floor(currentAccuracy) + ") discarded and retries timed out.");
+                        //Give up for now
+                        StopManagerAndResetAlarm();
 
                     //reset timestamp for next time.
                     this.firstRetryTimeStamp = 0;
@@ -790,8 +794,9 @@ public class GpsLoggingService extends Service  {
             double distanceTraveled = Utilities.CalculateDistance(loc.getLatitude(), loc.getLongitude(),
                     Session.getCurrentLatitude(), Session.getCurrentLongitude());
 
-            if (AppSettings.getMinimumDistanceInterval() > distanceTraveled) {
-                tracer.warn(String.format(getString(R.string.not_enough_distance_traveled), String.valueOf(Math.floor(distanceTraveled))) + ", point discarded");
+            if (AppSettings.getMinimumDistanceInMeters() > distanceTraveled) {
+                SetStatus("Only " + String.valueOf(Math.floor(distanceTraveled)) + " m traveled. Point discarded.");
+                tracer.warn("Only " + String.valueOf(Math.floor(distanceTraveled)) + " m traveled. Point discarded.");
                 StopManagerAndResetAlarm();
                 return;
             }
