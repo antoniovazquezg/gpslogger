@@ -134,15 +134,6 @@ public class Utilities {
               System.out.println("Could not configure logging!");
         }
 
-        String desiredAccuracyString = prefs.getString(
-                "desired_accuracy", "0");
-
-        if (desiredAccuracyString != null && desiredAccuracyString.length() > 0) {
-            AppSettings.setDesiredAccuracyInMeters(Integer
-                    .valueOf(desiredAccuracyString));
-        } else {
-            AppSettings.setDesiredAccuracyInMeters(0);
-        }
     }
 
 

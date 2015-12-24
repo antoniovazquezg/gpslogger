@@ -753,29 +753,26 @@ public class GpsLoggingService extends Service  {
 
         // Don't do anything until the user-defined accuracy is reached
         // However, if user has set an annotation, just log the point, disregard any filters
-        if (!Session.hasDescription() &&  AppSettings.getDesiredAccuracyInMeters() > 0) {
+        if (!Session.hasDescription() &&  AppSettings.getUserSelectedDesiredAccuracy() > 0) {
 
             //Don't apply the retry interval to passive locations
             double currentAccuracy = loc.getAccuracy();
-            if (!isPassiveLocation && AppSettings.getDesiredAccuracyInMeters() < Math.abs(currentAccuracy)) {
+            if (!isPassiveLocation && AppSettings.getUserSelectedDesiredAccuracy() < Math.abs(currentAccuracy)) {
 
                 if (this.firstRetryTimeStamp == 0) {
                     this.firstRetryTimeStamp = System.currentTimeMillis();
                 }
 
-                if (currentTimeStamp - this.firstRetryTimeStamp <= AppSettings.getRetryInterval() * 1000) {
-                    tracer.warn("Only accuracy of " + String.valueOf(Math.floor(currentAccuracy)) + " m. Point discarded.");
-                    SetStatus("Inaccurate point (" + Math.floor(currentAccuracy) + ") discarded.");
+                if (currentTimeStamp - this.firstRetryTimeStamp <= AppSettings.getLoggingRetryPeriod() * 1000) {
+                    tracer.warn("Only accuracy of " + String.valueOf(Math.floor(loc.getAccuracy())) + " m. Point discarded." + getString(R.string.inaccurate_point_discarded));
                     //return and keep trying
                     return;
                 }
 
-                if (currentTimeStamp - this.firstRetryTimeStamp > AppSettings.getRetryInterval() * 1000) {
-                    if (AppSettings.getMinimumAccuracyInMeters() < Math.abs(currentAccuracy)) {
-                        tracer.warn("Only accuracy of " + String.valueOf(Math.floor(currentAccuracy)) + " m and timeout reached");
-                        SetStatus("Inaccurate points (" + Math.floor(currentAccuracy) + ") discarded and retries timed out.");
-                        //Give up for now
-                        StopManagerAndResetAlarm();
+                if (currentTimeStamp - this.firstRetryTimeStamp > AppSettings.getLoggingRetryPeriod() * 1000) {
+                    tracer.warn("Only accuracy of " + String.valueOf(Math.floor(loc.getAccuracy())) + " m and timeout reached." + getString(R.string.inaccurate_point_discarded));
+                    //Give up for now
+                    StopManagerAndResetAlarm();
 
                     //reset timestamp for next time.
                     this.firstRetryTimeStamp = 0;
@@ -794,9 +791,8 @@ public class GpsLoggingService extends Service  {
             double distanceTraveled = Utilities.CalculateDistance(loc.getLatitude(), loc.getLongitude(),
                     Session.getCurrentLatitude(), Session.getCurrentLongitude());
 
-            if (AppSettings.getMinimumDistanceInMeters() > distanceTraveled) {
-                SetStatus("Only " + String.valueOf(Math.floor(distanceTraveled)) + " m traveled. Point discarded.");
-                tracer.warn("Only " + String.valueOf(Math.floor(distanceTraveled)) + " m traveled. Point discarded.");
+            if (AppSettings.getMinimumDistanceInterval() > distanceTraveled) {
+                tracer.warn(String.format(getString(R.string.not_enough_distance_traveled), String.valueOf(Math.floor(distanceTraveled))) + ", point discarded");
                 StopManagerAndResetAlarm();
                 return;
             }

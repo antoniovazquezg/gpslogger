@@ -34,7 +34,7 @@ public class AppSettings extends Application {
     private static SharedPreferences prefs;
     private static AppSettings instance;
     private static org.slf4j.Logger tracer = LoggerFactory.getLogger(AppSettings.class.getSimpleName());
-    private static int desiredAccuracy;
+
 
     @Override
     public void onCreate() {
@@ -319,9 +319,13 @@ public class AppSettings extends Application {
         return listeners;
     }
 
+    public static int getUserSelectedMinimumAccuracyForLogging() {
+        return prefs.getInt("MINIMUM_ACCURACY_FOR_LOGGING", 0);
+    }
 
-
-
+    public static int getUserSelectedDesiredAccuracy() {
+        return prefs.getInt("DESIRED_ACCURACY", 0);
+    }
 
     /**
      * New file creation preference:
@@ -339,21 +343,6 @@ public class AppSettings extends Application {
      */
     public static boolean shouldCreateNewFileOnceADay() {
         return (getNewFileCreationMode().equals("onceaday"));
-    }
-
-
-    /**
-     * @return the desiredAccuracy
-     */
-    public static int getDesiredAccuracyInMeters() {
-        return desiredAccuracy;
-    }
-
-    /**
-     * @param desiredAccuracy the desiredAccuracy to set
-     */
-    static void setDesiredAccuracyInMeters(int desiredAccuracy) {
-        AppSettings.desiredAccuracy = desiredAccuracy;
     }
 
 
